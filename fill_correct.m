@@ -1,12 +1,16 @@
 clear
 
+directory = '../S_72';
+
 %% Split eigenvalue output into separate k-points
-system('split -p "K-point" ../S_72/eigs.txt "kpoint-"'); 
+systemcall = sprintf('split -p \"K-point\" %s/eigs.txt \"%s/kpoint-\"' ...
+                ,directory,directory); 
+system(systemcall);
 
 %% Import data
 j = 1;
 for name='a':'n'
-kpoints(j)=importdata(sprintf('kpoint-a%s',name));
+kpoints(j)=importdata(sprintf('%s/kpoint-a%s',directory,name));
 j = j+1;
 end
 
@@ -23,6 +27,15 @@ end
 %% Get eigenvalues of lowest filled energy levels
 
 for i = 1:length(kpoints)
-eigs(:,i) = kpoints(i).data((kpoints(i).data(:,2)~=0),4);
+eigs(:,i) = kpoints(i).data(:,4);
 end
-%low_eigs = eigs(end,:);
+
+eigs_trim=eigs(kpoints(1).data(:,2)~=0,:);
+low_eigs = eigs_trim(end,:);
+
+%% Calculate band filling correction energy
+
+correction = min(low_eigs) - ...
+             (low_eigs(1) + 2*sum(low_eigs(2:end)))/(length(low_eigs)*2-1);
+         
+         fprintf('Band filling correction: %f eV\n', correction);

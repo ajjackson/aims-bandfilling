@@ -1,5 +1,18 @@
-clear
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                         %
+%  fill_correct.m: MATLAB routine for calculating band filling correction %
+%                  for supercell calculations with FHI-aims               %
+%                                                                         %
+%  Usage: Extract eigenvalues from FHI-aims output file, save to file     %
+%         "eigs.txt". Change "directory" variable to working directory.   %
+%                                                                         %
+%  Requirements: MATLAB, Unix-like system with "split -p" option (i.e.OSX)%
+%                                                                         %
+%  Author: Adam Jackson, Walsh Materials Design Group, University of Bath %
+%                                                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+clear
 directory = '../S_72';
 
 %% Split eigenvalue output into separate k-points
@@ -38,4 +51,5 @@ low_eigs = eigs_trim(end,:);
 correction = min(low_eigs) - ...
              (low_eigs(1) + 2*sum(low_eigs(2:end)))/(length(low_eigs)*2-1);
          
-         fprintf('Band filling correction: %f eV\n', correction);
+fprintf('Band filling correction: %f eV\n', correction);
+         

@@ -3,10 +3,12 @@
 %  fill_correct.m: MATLAB routine for calculating band filling correction %
 %                  for supercell calculations with FHI-aims               %
 %                                                                         %
-%  Usage: Extract eigenvalues from FHI-aims output file, save to file     %
-%         "eigs.txt". Change "directory" variable to working directory.   %
+%  Usage: Set "directory" and "file" variables to appropriate strings.    %
+%         Execute script without arguments.                               %
 %                                                                         %
-%  Requirements: MATLAB, Unix-like system with "split -p" option (i.e.OSX)%
+%                                                                         %
+%  Requirements: MATLAB, Unix-like system with SED, TAIL, and SPLIT -p    %
+%                (i.e. OSX)                                               %
 %                                                                         %
 %  Author: Adam Jackson, Walsh Materials Design Group, University of Bath %
 %                                                                         %
@@ -14,11 +16,37 @@
 
 clear
 directory = '../S_72';
+file = '0207.out';
 
-%% Split eigenvalue output into separate k-points
-systemcall = sprintf('split -p \"K-point\" %s/eigs.txt \"%s/kpoint-\"' ...
+
+%% Extract final eigenvalues and split into separate k-points
+%  sed -n '/K-point:       1/=' 0207.out 
+%  sed -n '/Highest occupied state (VBM)/=' 0207.out 
+
+%  sed -n -e "$FIRST_LINE,$(echo $LAST_LINE)p" 0207.out | sed '$d' > eigs2.txt
+
+systemcall1 = sprintf( ... 
+    'sed -n "/K-point:       1 /=" %s/%s | tail -1' ...
+        ,directory,file);
+systemcall2 = sprintf( ...
+    'sed -n "/Highest occupied state (VBM)/=" %s/%s %s' ...    
+        ,directory,file,'| tail -1');
+
+%%%%%%%%% Get line numbers for last set of eigenvalues %%%%%%%%%    
+[dummy, first_line] = system(systemcall1);
+[dummy, last_line] = system(systemcall2);
+
+%%%%%%%%% Write to eigs.tmp %%%%%%%%%%
+systemcall3 = sprintf( ...
+    'sed -n "%d,%dp" %s/%s | sed "/Highest/d" > %s/eigs.tmp' ...
+    ,str2num(first_line),str2num(last_line),directory,file ...
+    ,directory);
+system(systemcall3);        
+
+%%%%%%%%% Split to individual k-point files %%%%%%%%%%
+systemcall4 = sprintf('split -p \"K-point\" %s/eigs.tmp \"%s/kpoint-\"' ...
                 ,directory,directory); 
-system(systemcall);
+system(systemcall4);
 
 %% Import data
 j = 1;

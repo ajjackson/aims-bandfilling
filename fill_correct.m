@@ -75,7 +75,7 @@ occupancy(:,1) = eigs_trim(end,:,2)';
 %% Calculate band filling correction energy
 
 contributions = (band-band(min_point)).*occupancy.*k_weight;
-    correction = sum(contributions)/sum(k_weight);
+    correction = -sum(contributions)/sum(k_weight);
          
 fprintf('Band filling correction: %f eV\n', correction);
          

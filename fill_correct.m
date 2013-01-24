@@ -15,15 +15,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear
-directory = '../S_72';
-file = '0207.out';
+directory = '../S_128';
+file = '0210.out';
 
 
 %% Extract final eigenvalues and split into separate k-points
-%  sed -n '/K-point:       1/=' 0207.out 
-%  sed -n '/Highest occupied state (VBM)/=' 0207.out 
-
-%  sed -n -e "$FIRST_LINE,$(echo $LAST_LINE)p" 0207.out | sed '$d' > eigs2.txt
 
 systemcall1 = sprintf( ... 
     'sed -n "/K-point:       1 /=" %s/%s | tail -1' ...
@@ -50,36 +46,37 @@ system(systemcall4);
 
 %% Import data
 j = 1;
-for name='a':'n'
+for name='a':'j'
 kpoints(j)=importdata(sprintf('%s/kpoint-a%s',directory,name));
 j = j+1;
 end
 
-% Using time reversal symmetry and assuming first k-point is gamma point
+% Using time reversal symmetry and setting non-symmetric points
 k_weight(1,1) = 1;
 k_weight(2:length(kpoints),:) = 2;
+k_weight(3,1) = 1;
 
-%% Get eigenvalues and occupancies of lowest filled energy levels
-
-min_point = 1; % Assume that minimum is at gamma point
-
+%% Identify reference energy
 for i = 1:length(kpoints)
-eigs(:,i,1) = kpoints(i).data(:,4);
-eigs(:,i,2) = kpoints(i).data(:,2);
+   max_filled(i) = max(kpoints(i).data(kpoints(i).data(:,2)~=0,4));   
 end
-
-eigs_trim=eigs(kpoints(min_point).data(:,2)~=0,:,:);
-band(:,1) = eigs_trim(end,:,1)';
-occupancy(:,1) = eigs_trim(end,:,2)';
+% Assuming minimum at gamma point
+ref_e = max_filled(1);
 
 %% Calculate band filling correction energy
 
-contributions = (band-band(min_point)).*occupancy.*k_weight;
-    correction = -sum(contributions)/sum(k_weight);
+for i = 1:length(kpoints)
+    high_energies = kpoints(i).data(kpoints(i).data(:,4)>=ref_e, 4);
+    band_occupancy = kpoints(i).data(kpoints(i).data(:,4)>=ref_e, 2);
+    contributions(i) = sum((high_energies-ref_e).*band_occupancy*k_weight(i));
+    kp_occupancy(i,1) = sum(band_occupancy);
+end
+
+correction = -sum(contributions)/sum(k_weight);
          
 fprintf('Band filling correction: %f eV\n', correction);
          
 %% Check occupancy is sane
-total_occupation = sum(occupancy.*k_weight)/sum(k_weight);
+total_occupation = sum(kp_occupancy.*k_weight)/sum(k_weight);
 
 fprintf('Conduction band occupation: %f electrons\n',total_occupation);

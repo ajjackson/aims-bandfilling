@@ -5,10 +5,10 @@
 %                                                                         %
 %  Usage: Set "directory" and "file" variables to appropriate strings.    %
 %         Execute script without arguments.                               %
+%         k-point weighting must be set manually.                         %
 %                                                                         %
 %                                                                         %
-%  Requirements: MATLAB, Unix-like system with SED, TAIL, and SPLIT -p    %
-%                (i.e. OSX)                                               %
+%  Requirements: MATLAB, Unix-like system with SED, TAIL, and AWK         %
 %                                                                         %
 %  Author: Adam Jackson, Walsh Materials Design Group, University of Bath %
 %                                                                         %
@@ -40,15 +40,21 @@ systemcall3 = sprintf( ...
 system(systemcall3);        
 
 %%%%%%%%% Split to individual k-point files %%%%%%%%%%
-systemcall4 = sprintf('split -p \"K-point\" %s/eigs.tmp \"%s/kpoint-\"' ...
-                ,directory,directory); 
+
+systemcall4 = sprintf('awk ''BEGIN{i=0} %s%s/kpoint-" i; %s %s/eigs.tmp',...
+  '/K-point/{++i}{filename = "',directory,'print >filename }''',directory);
 system(systemcall4);
 
+%%%%%%%%% Count k-points %%%%%%%%%
+systemcall5=sprintf('grep -c ''K-point'' %s/eigs.tmp',directory);
+[dummy, n_kpoints] = system(systemcall5);
+n_kpoints = str2num(n_kpoints);
+
 %% Import data
-j = 1;
-for name='a':'j'
-kpoints(j)=importdata(sprintf('%s/kpoint-a%s',directory,name));
-j = j+1;
+
+for i=1:n_kpoints
+kpoints(i)=importdata(sprintf('%s/kpoint-%d',directory,i));
+i = i+1;
 end
 
 % Using time reversal symmetry and setting non-symmetric points
@@ -57,7 +63,7 @@ k_weight(2:length(kpoints),:) = 2;
 k_weight(3,1) = 1;
 
 %% Identify reference energy
-for i = 1:length(kpoints)
+for i = 1:n_kpoints
    max_filled(i) = max(kpoints(i).data(kpoints(i).data(:,2)~=0,4));   
 end
 % Assuming minimum at gamma point

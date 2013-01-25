@@ -3,10 +3,12 @@
 %  fill_correct.m: MATLAB routine for calculating band filling correction %
 %                  for supercell calculations with FHI-aims               %
 %                                                                         %
-%  Usage: Set "directory" and "file" variables to appropriate strings.    %
-%         Execute script without arguments.                               %
-%         k-point weighting must be set manually.                         %
-%                                                                         %
+%  Usage: correction = fill_correct('directory','file')                   %
+%         where 'directory' and 'file' are the location and filename of   %
+%         an FHI-aims output file. The FHI-aims run must be executed with %
+%         the "output k_eigenvalue n" option to obtain data for each      %
+%         k-point. The k-point weighting must be set up manually in the   %
+%         first section of this code ("Define k-point weighting").        %
 %                                                                         %
 %  Requirements: MATLAB, Unix-like system with SED, TAIL, and AWK         %
 %                                                                         %
@@ -14,10 +16,14 @@
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear
-directory = '../S_128';
-file = '0210.out';
+function correction = fill_correct(directory,file)
 
+%% Define k-point weighting
+
+% Using time reversal symmetry and setting non-symmetric points
+k_weight(1,1) = 1;
+k_weight(2:length(kpoints),:) = 2;
+k_weight(3,1) = 1;
 
 %% Extract final eigenvalues and split into separate k-points
 
@@ -56,11 +62,6 @@ for i=1:n_kpoints
 kpoints(i)=importdata(sprintf('%s/kpoint-%d',directory,i));
 i = i+1;
 end
-
-% Using time reversal symmetry and setting non-symmetric points
-k_weight(1,1) = 1;
-k_weight(2:length(kpoints),:) = 2;
-k_weight(3,1) = 1;
 
 %% Identify reference energy
 for i = 1:n_kpoints

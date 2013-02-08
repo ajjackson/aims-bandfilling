@@ -10,3 +10,11 @@ For more information on this calculation see:
 Persson et al, Physical Review B 72, 035211 (2005). doi:10.1103/PhysRevB.72.035211
 
 This project is not officially affiliated with FHI-aims.
+
+
+----------------
+To do:
+Automate k-point weighting
+*check FHI-aims output file
+*if not in file (FHI-aims requires a flag to be set, not available in earlier versions)
+ check file in directory named "k-weighting.conf"

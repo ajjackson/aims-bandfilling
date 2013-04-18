@@ -21,9 +21,19 @@ function correction = fill_correct(directory,file)
 %% Define k-point weighting
 
 % Using time reversal symmetry and setting non-symmetric points
-k_weight(1,1) = 1;
-k_weight(2:length(kpoints),:) = 2;
-k_weight(3,1) = 1;
+
+% % For [3 3 3] k-point grid (S_72)
+% k_weight(1,1) = 1;
+% k_weight(2:14,1) = 2;
+
+% % For [2 3 2] k-point grid (S_128)
+% k_weight(1,1) = 1;
+% k_weight(2:10,1) = 2;
+% k_weight(3,1) = 1;
+
+% % For [2 2 2] k-point grid (S_300)
+% k_weight(1:8) = 1;
+
 
 %% Extract final eigenvalues and split into separate k-points
 

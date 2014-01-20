@@ -14,6 +14,18 @@
 %                                                                         %
 %  Author: Adam Jackson, Walsh Materials Design Group, University of Bath %
 %                                                                         %
+%   This program is free software: you can redistribute it and/or modify  %
+%   it under the terms of the GNU General Public License as published by  %
+%   the Free Software Foundation, either version 3 of the License, or     %
+%   (at your option) any later version.                                   %
+%                                                                         %
+%   This program is distributed in the hope that it will be useful,       %
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of        %
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         %
+%   GNU General Public License for more details.                          %
+%                                                                         %
+%   You should have received a copy of the GNU General Public License     %
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>. %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function correction = fill_correct(directory,file)
@@ -21,9 +33,19 @@ function correction = fill_correct(directory,file)
 %% Define k-point weighting
 
 % Using time reversal symmetry and setting non-symmetric points
-k_weight(1,1) = 1;
-k_weight(2:length(kpoints),:) = 2;
-k_weight(3,1) = 1;
+
+% % For [3 3 3] k-point grid (S_72)
+% k_weight(1,1) = 1;
+% k_weight(2:14,1) = 2;
+
+% % For [2 3 2] k-point grid (S_128)
+% k_weight(1,1) = 1;
+% k_weight(2:10,1) = 2;
+% k_weight(3,1) = 1;
+
+% % For [2 2 2] k-point grid (S_300)
+% k_weight(1:8) = 1;
+
 
 %% Extract final eigenvalues and split into separate k-points
 
